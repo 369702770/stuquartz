@@ -12,7 +12,7 @@ import java.util.Date;
  */
 public class HelloScheduler {
     public static void main(String[] args) throws SchedulerException {
-        Date date=new Date();
+        Date date = new Date();
         //创建一个JobDetail实例，将该实例与HelloJob Class绑定
         JobDetail jobDetail = JobBuilder.newJob(HelloJob.class)
                 .withIdentity("myjob", "group1")
@@ -22,25 +22,40 @@ public class HelloScheduler {
         System.out.println(jobDetail.getKey().getName());
         System.out.println(jobDetail.getKey().getGroup());
         System.out.println(jobDetail.getJobClass().getName());
-        date.setTime(date.getTime()+3000);
-        Date endDate = new Date();
-        endDate.setTime(endDate.getTime()+6000);
+        date.setTime(date.getTime() + 3000);
 
-        //创建一个Trigger实例，定义该job立即执行，并且每隔两秒钟重复执行一次
-        Trigger trigger = TriggerBuilder.newTrigger()
+
+//        //创建一个Trigger实例，定义该job立即执行，并且每隔两秒钟重复执行一次
+//        SimpleTrigger trigger =(SimpleTrigger) TriggerBuilder.newTrigger()
+//                .withIdentity("myTrigger", "group1")
+//                .usingJobData("message", "hello myTrigger1")
+//                .usingJobData("DoubleJobValue", 2.0D)
+//                .startAt(date)
+//                .endAt(endDate)
+//                .withSchedule(SimpleScheduleBuilder.simpleSchedule().withIntervalInSeconds(2).repeatForever()).build();
+//        //创建Scheduler实例
+//        SchedulerFactory sfact = new StdSchedulerFactory();
+//        Scheduler scheduler = sfact.getScheduler();
+//        scheduler.start();
+//        SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//        System.out.println("Current Exec time is：" + sf.format(date));
+//        scheduler.scheduleJob(jobDetail, trigger);
+        date.setTime(date.getTime() + 2000);
+        Date endDate = new Date();
+        endDate.setTime(endDate.getTime() + 6000);
+        //距离当前时间4秒钟执行且仅执行一次 然后每隔2秒执行一次
+        SimpleTrigger trigger1 = (SimpleTrigger) TriggerBuilder.newTrigger()
                 .withIdentity("myTrigger", "group1")
-                .usingJobData("message", "hello myTrigger1")
-                .usingJobData("DoubleJobValue", 2.0D)
-                .startAt(date)
+                .startNow()
                 .endAt(endDate)
-                .withSchedule(SimpleScheduleBuilder.simpleSchedule().withIntervalInSeconds(2).repeatForever()).build();
-        //创建Scheduler实例
+                //两秒钟执行一次 无限次执行
+                .withSchedule(SimpleScheduleBuilder.simpleSchedule().withIntervalInSeconds(2).withRepeatCount(SimpleTrigger.REPEAT_INDEFINITELY))
+                .build();
         SchedulerFactory sfact = new StdSchedulerFactory();
         Scheduler scheduler = sfact.getScheduler();
+        scheduler.scheduleJob(jobDetail, trigger1);
         scheduler.start();
-        SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        System.out.println("Current Exec time is：" + sf.format(date));
-        scheduler.scheduleJob(jobDetail, trigger);
+
 
     }
 }
